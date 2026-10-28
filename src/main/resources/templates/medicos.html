@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gestión de Médicos - SISMED Vida Sana</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background-color: #f4f7fb;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f766e, #0d9488);
+            color: white;
+            padding: 20px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header span {
+            font-size: 14px;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .top-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .top-section h2 {
+            color: #1f2937;
+            font-size: 26px;
+        }
+
+        .btn-primary {
+            background-color: #0f766e;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            background-color: #115e59;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #f0fdfa;
+            color: #134e4a;
+            padding: 14px;
+            text-align: left;
+            border-bottom: 2px solid #ccfbf1;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .badge {
+            background-color: #dcfce7;
+            color: #166534;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .btn-edit {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-delete {
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #6b7280;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 650px;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #1f2937;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+        }
+
+        .form-buttons {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-cancel {
+            background-color: #6b7280;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            background-color: #0f766e;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+    <div>
+
+        <h1>SISMED Vida Sana</h1>
+
+        <span>
+            Sistema de Gestión Médica
+        </span>
+
+    </div>
+
+    <span>
+        Gestión de Médicos
+    </span>
+
+</div>
+
+<div class="container">
+
+    <div class="top-section">
+
+        <h2>Médicos</h2>
+
+        <button
+                class="btn-primary"
+                onclick="abrirModal()">
+
+            + Nuevo médico
+
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <div class="search-box">
+
+            <input
+                    type="text"
+                    id="buscar"
+                    placeholder="Buscar médico por DNI, nombres, apellidos o especialidad..."
+                    onkeyup="filtrarMedicos()">
+
+        </div>
+
+        <table>
+
+            <thead>
+
+            <tr>
+
+                <th>DNI</th>
+                <th>Nombres</th>
+                <th>Apellidos</th>
+                <th>Especialidad</th>
+                <th>Teléfono</th>
+                <th>CMP</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+
+            </tr>
+
+            </thead>
+
+            <tbody id="tablaMedicos">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<!-- MODAL -->
+
+<div id="modalMedico" class="modal">
+
+    <div class="modal-content">
+
+        <h2>Registrar médico</h2>
+
+        <form id="formMedico">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label>DNI</label>
+
+                    <input
+                            type="text"
+                            id="dni"
+                            maxlength="8"
+                            required>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Nombres</label>
+
+                    <input
+                            type="text"
+                            id="nombres"
+                            required>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Apellidos</label>
+
+                    <input
+                            type="text"
+                            id="apellidos"
+                            required>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Especialidad</label>
+
+                    <select id="especialidad" required>
+
+                        <option value="">
+                            Seleccione
+                        </option>
+
+                        <option value="Medicina General">
+                            Medicina General
+                        </option>
+
+                        <option value="Cardiología">
+                            Cardiología
+                        </option>
+
+                        <option value="Pediatría">
+                            Pediatría
+                        </option>
+
+                        <option value="Ginecología">
+                            Ginecología
+                        </option>
+
+                        <option value="Dermatología">
+                            Dermatología
+                        </option>
+
+                        <option value="Traumatología">
+                            Traumatología
+                        </option>
+
+                        <option value="Odontología">
+                            Odontología
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Teléfono</label>
+
+                    <input
+                            type="text"
+                            id="telefono"
+                            maxlength="9">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Correo</label>
+
+                    <input
+                            type="email"
+                            id="correo">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>CMP</label>
+
+                    <input
+                            type="text"
+                            id="cmp"
+                            maxlength="30">
+
+                </div>
+
+            </div>
+
+            <div class="form-buttons">
+
+                <button
+                        type="button"
+                        class="btn-cancel"
+                        onclick="cerrarModal()">
+
+                    Cancelar
+
+                </button>
+
+                <button
+                        type="submit"
+                        class="btn-save">
+
+                    Guardar médico
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    let medicos = [];
+
+    async function cargarMedicos() {
+
+        try {
+
+            const respuesta =
+                await fetch('/api/medicos');
+
+            if (!respuesta.ok) {
+
+                throw new Error(
+                    'No se pudieron cargar los médicos'
+                );
+
+            }
+
+            medicos = await respuesta.json();
+
+            mostrarMedicos(medicos);
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert('Error al cargar los médicos');
+
+        }
+
+    }
+
+
+    function mostrarMedicos(lista) {
+
+        const tabla =
+            document.getElementById('tablaMedicos');
+
+        tabla.innerHTML = '';
+
+        if (lista.length === 0) {
+
+            tabla.innerHTML = `
+
+                <tr>
+
+                    <td colspan="8" class="empty">
+
+                        No hay médicos registrados.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        lista.forEach(medico => {
+
+            const fila =
+                document.createElement('tr');
+
+            fila.innerHTML = `
+
+                <td>${medico.dni}</td>
+
+                <td>${medico.nombres}</td>
+
+                <td>${medico.apellidos}</td>
+
+                <td>${medico.especialidad}</td>
+
+                <td>${medico.telefono || '-'}</td>
+
+                <td>${medico.cmp || '-'}</td>
+
+                <td>
+
+                    <span class="badge">
+
+                        ${medico.activo ? 'Activo' : 'Inactivo'}
+
+                    </span>
+
+                </td>
+
+                <td>
+
+                    <button
+                            class="btn-edit"
+                            onclick="editarMedico(${medico.id})">
+
+                        Editar
+
+                    </button>
+
+                    <button
+                            class="btn-delete"
+                            onclick="eliminarMedico(${medico.id})">
+
+                        Eliminar
+
+                    </button>
+
+                </td>
+
+            `;
+
+            tabla.appendChild(fila);
+
+        });
+
+    }
+
+
+    function filtrarMedicos() {
+
+        const texto =
+            document.getElementById('buscar')
+                .value
+                .toLowerCase();
+
+        const filtrados = medicos.filter(medico =>
+
+            medico.dni.toLowerCase().includes(texto) ||
+
+            medico.nombres.toLowerCase().includes(texto) ||
+
+            medico.apellidos.toLowerCase().includes(texto) ||
+
+            medico.especialidad.toLowerCase().includes(texto)
+
+        );
+
+        mostrarMedicos(filtrados);
+
+    }
+
+
+    function abrirModal() {
+
+        document.getElementById(
+            'modalMedico'
+        ).style.display = 'block';
+
+    }
+
+
+    function cerrarModal() {
+
+        document.getElementById(
+            'modalMedico'
+        ).style.display = 'none';
+
+        document.getElementById(
+            'formMedico'
+        ).reset();
+
+    }
+
+
+    document
+        .getElementById('formMedico')
+        .addEventListener(
+            'submit',
+            async function(event) {
+
+                event.preventDefault();
+
+                const medico = {
+
+                    dni:
+                        document.getElementById('dni').value,
+
+                    nombres:
+                        document.getElementById('nombres').value,
+
+                    apellidos:
+                        document.getElementById('apellidos').value,
+
+                    especialidad:
+                        document.getElementById('especialidad').value,
+
+                    telefono:
+                        document.getElementById('telefono').value || null,
+
+                    correo:
+                        document.getElementById('correo').value || null,
+
+                    cmp:
+                        document.getElementById('cmp').value || null
+
+                };
+
+
+                try {
+
+                    const respuesta =
+                        await fetch(
+                            '/api/medicos',
+                            {
+                                method: 'POST',
+
+                                headers: {
+                                    'Content-Type':
+                                        'application/json'
+                                },
+
+                                body:
+                                    JSON.stringify(medico)
+                            }
+                        );
+
+
+                    if (!respuesta.ok) {
+
+                        alert(
+                            'No se pudo registrar el médico. ' +
+                            'Verifique los datos o el DNI.'
+                        );
+
+                        return;
+
+                    }
+
+
+                    alert(
+                        'Médico registrado correctamente'
+                    );
+
+                    cerrarModal();
+
+                    cargarMedicos();
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    alert(
+                        'Error al registrar el médico'
+                    );
+
+                }
+
+            }
+        );
+
+
+    async function eliminarMedico(id) {
+
+        if (
+            !confirm(
+                '¿Está seguro de eliminar este médico?'
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        try {
+
+            const respuesta =
+                await fetch(
+                    `/api/medicos/${id}`,
+                    {
+                        method: 'DELETE'
+                    }
+                );
+
+
+            if (!respuesta.ok) {
+
+                alert(
+                    'No se pudo eliminar el médico'
+                );
+
+                return;
+
+            }
+
+
+            alert(
+                'Médico eliminado correctamente'
+            );
+
+            cargarMedicos();
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                'Error al eliminar el médico'
+            );
+
+        }
+
+    }
+
+
+    function editarMedico(id) {
+
+        alert(
+            'La edición de médicos se implementará en la siguiente mejora del módulo.'
+        );
+
+    }
+
+
+    cargarMedicos();
+
+</script>
+
+</body>
+
+</html>

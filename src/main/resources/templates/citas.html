@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gestión de Citas - SISMED Vida Sana</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #f4f7fb;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f766e, #0d9488);
+            color: white;
+            padding: 20px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .top-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .top-section h2 {
+            color: #1f2937;
+            font-size: 26px;
+        }
+
+        .btn-primary {
+            background: #0f766e;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            background: #115e59;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+        }
+
+        .search {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f0fdfa;
+            color: #134e4a;
+            padding: 14px;
+            text-align: left;
+            border-bottom: 2px solid #ccfbf1;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        .estado {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .pendiente {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .confirmada {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .atendida {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .cancelada {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn-delete {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #6b7280;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,.5);
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-cancel {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            background: #0f766e;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+    <div>
+        <h1>SISMED Vida Sana</h1>
+        <span>Sistema de Gestión Médica</span>
+    </div>
+
+    <span>Gestión de Citas</span>
+
+</div>
+
+
+<div class="container">
+
+    <div class="top-section">
+
+        <h2>Citas médicas</h2>
+
+        <button
+                class="btn-primary"
+                onclick="abrirModal()">
+
+            + Nueva cita
+
+        </button>
+
+    </div>
+
+
+    <div class="card">
+
+        <input
+                class="search"
+                id="buscar"
+                type="text"
+                placeholder="Buscar por paciente, médico o estado..."
+                onkeyup="filtrarCitas()">
+
+
+        <table>
+
+            <thead>
+
+            <tr>
+
+                <th>Fecha y hora</th>
+                <th>Paciente</th>
+                <th>Médico</th>
+                <th>Especialidad</th>
+                <th>Motivo</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+
+            </tr>
+
+            </thead>
+
+            <tbody id="tablaCitas">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<!-- MODAL -->
+
+<div id="modalCita" class="modal">
+
+    <div class="modal-content">
+
+        <h2>Registrar cita</h2>
+
+        <form id="formCita">
+
+            <div class="form-group">
+
+                <label>Paciente</label>
+
+                <select id="paciente" required>
+
+                    <option value="">
+                        Seleccione un paciente
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Médico</label>
+
+                <select id="medico" required>
+
+                    <option value="">
+                        Seleccione un médico
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Fecha y hora</label>
+
+                <input
+                        type="datetime-local"
+                        id="fechaHora"
+                        required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Motivo de la consulta</label>
+
+                <textarea
+                        id="motivo"
+                        maxlength="250"
+                        placeholder="Ingrese el motivo de la consulta">
+                </textarea>
+
+            </div>
+
+
+            <div class="form-buttons">
+
+                <button
+                        type="button"
+                        class="btn-cancel"
+                        onclick="cerrarModal()">
+
+                    Cancelar
+
+                </button>
+
+                <button
+                        type="submit"
+                        class="btn-save">
+
+                    Guardar cita
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    let citas = [];
+    let pacientes = [];
+    let medicos = [];
+
+
+    async function cargarDatos() {
+
+        try {
+
+            const [respuestaCitas,
+                   respuestaPacientes,
+                   respuestaMedicos] =
+                await Promise.all([
+
+                    fetch('/api/citas'),
+
+                    fetch('/api/pacientes'),
+
+                    fetch('/api/medicos')
+
+                ]);
+
+
+            if (!respuestaCitas.ok ||
+                !respuestaPacientes.ok ||
+                !respuestaMedicos.ok) {
+
+                throw new Error(
+                    'No se pudieron cargar los datos'
+                );
+
+            }
+
+
+            citas = await respuestaCitas.json();
+
+            pacientes = await respuestaPacientes.json();
+
+            medicos = await respuestaMedicos.json();
+
+
+            cargarSelectPacientes();
+
+            cargarSelectMedicos();
+
+            mostrarCitas(citas);
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                'Error al cargar la información'
+            );
+
+        }
+
+    }
+
+
+    function cargarSelectPacientes() {
+
+        const select =
+            document.getElementById('paciente');
+
+        select.innerHTML = `
+            <option value="">
+                Seleccione un paciente
+            </option>
+        `;
+
+
+        pacientes
+            .filter(p => p.activo)
+            .forEach(paciente => {
+
+                const option =
+                    document.createElement('option');
+
+                option.value = paciente.id;
+
+                option.textContent =
+                    `${paciente.dni} - ${paciente.nombres} ${paciente.apellidos}`;
+
+                select.appendChild(option);
+
+            });
+
+    }
+
+
+    function cargarSelectMedicos() {
+
+        const select =
+            document.getElementById('medico');
+
+        select.innerHTML = `
+            <option value="">
+                Seleccione un médico
+            </option>
+        `;
+
+
+        medicos
+            .filter(m => m.activo)
+            .forEach(medico => {
+
+                const option =
+                    document.createElement('option');
+
+                option.value = medico.id;
+
+                option.textContent =
+                    `${medico.nombres} ${medico.apellidos} - ${medico.especialidad}`;
+
+                select.appendChild(option);
+
+            });
+
+    }
+
+
+    function mostrarCitas(lista) {
+
+        const tabla =
+            document.getElementById('tablaCitas');
+
+        tabla.innerHTML = '';
+
+
+        if (lista.length === 0) {
+
+            tabla.innerHTML = `
+
+                <tr>
+
+                    <td colspan="7" class="empty">
+
+                        No hay citas registradas.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        lista.forEach(cita => {
+
+            const fila =
+                document.createElement('tr');
+
+
+            const fecha =
+                new Date(cita.fechaHora);
+
+
+            const fechaTexto =
+                fecha.toLocaleString('es-PE');
+
+
+            const estado =
+                (cita.estado || 'PENDIENTE')
+                    .toLowerCase();
+
+
+            fila.innerHTML = `
+
+                <td>${fechaTexto}</td>
+
+                <td>
+                    ${cita.paciente.nombres}
+                    ${cita.paciente.apellidos}
+                </td>
+
+                <td>
+                    Dr. ${cita.medico.nombres}
+                    ${cita.medico.apellidos}
+                </td>
+
+                <td>
+                    ${cita.medico.especialidad}
+                </td>
+
+                <td>
+                    ${cita.motivo || '-'}
+                </td>
+
+                <td>
+
+                    <span class="estado ${estado}">
+
+                        ${cita.estado}
+
+                    </span>
+
+                </td>
+
+                <td>
+
+                    <button
+                            class="btn-delete"
+                            onclick="eliminarCita(${cita.id})">
+
+                        Eliminar
+
+                    </button>
+
+                </td>
+
+            `;
+
+
+            tabla.appendChild(fila);
+
+        });
+
+    }
+
+
+    function filtrarCitas() {
+
+        const texto =
+            document.getElementById('buscar')
+                .value
+                .toLowerCase();
+
+
+        const filtradas =
+            citas.filter(cita => {
+
+                const paciente =
+                    `${cita.paciente.nombres}
+                     ${cita.paciente.apellidos}`
+                        .toLowerCase();
+
+                const medico =
+                    `${cita.medico.nombres}
+                     ${cita.medico.apellidos}`
+                        .toLowerCase();
+
+                const estado =
+                    cita.estado.toLowerCase();
+
+
+                return paciente.includes(texto)
+                    || medico.includes(texto)
+                    || estado.includes(texto);
+
+            });
+
+
+        mostrarCitas(filtradas);
+
+    }
+
+
+    function abrirModal() {
+
+        cargarDatos();
+
+        document.getElementById(
+            'modalCita'
+        ).style.display = 'block';
+
+    }
+
+
+    function cerrarModal() {
+
+        document.getElementById(
+            'modalCita'
+        ).style.display = 'none';
+
+        document.getElementById(
+            'formCita'
+        ).reset();
+
+    }
+
+
+    document
+        .getElementById('formCita')
+        .addEventListener(
+            'submit',
+            async function(event) {
+
+                event.preventDefault();
+
+
+                const cita = {
+
+                    paciente: {
+
+                        id: Number(
+                            document.getElementById(
+                                'paciente'
+                            ).value
+                        )
+
+                    },
+
+                    medico: {
+
+                        id: Number(
+                            document.getElementById(
+                                'medico'
+                            ).value
+                        )
+
+                    },
+
+                    fechaHora:
+                        document.getElementById(
+                            'fechaHora'
+                        ).value,
+
+                    motivo:
+                        document.getElementById(
+                            'motivo'
+                        ).value,
+
+                    estado: 'PENDIENTE'
+
+                };
+
+
+                try {
+
+                    const respuesta =
+                        await fetch(
+                            '/api/citas',
+                            {
+
+                                method: 'POST',
+
+                                headers: {
+                                    'Content-Type':
+                                        'application/json'
+                                },
+
+                                body:
+                                    JSON.stringify(cita)
+
+                            }
+                        );
+
+
+                    if (!respuesta.ok) {
+
+                        const mensaje =
+                            await respuesta.text();
+
+                        alert(
+                            'No se pudo registrar la cita.\n'
+                            + mensaje
+                        );
+
+                        return;
+
+                    }
+
+
+                    alert(
+                        'Cita registrada correctamente'
+                    );
+
+
+                    cerrarModal();
+
+                    cargarDatos();
+
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    alert(
+                        'Error al registrar la cita'
+                    );
+
+                }
+
+            }
+        );
+
+
+    async function eliminarCita(id) {
+
+        if (
+            !confirm(
+                '¿Está seguro de eliminar esta cita?'
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        try {
+
+            const respuesta =
+                await fetch(
+                    `/api/citas/${id}`,
+                    {
+                        method: 'DELETE'
+                    }
+                );
+
+
+            if (!respuesta.ok) {
+
+                alert(
+                    'No se pudo eliminar la cita'
+                );
+
+                return;
+
+            }
+
+
+            alert(
+                'Cita eliminada correctamente'
+            );
+
+            cargarDatos();
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                'Error al eliminar la cita'
+            );
+
+        }
+
+    }
+
+
+    cargarDatos();
+
+</script>
+
+</body>
+
+</html>

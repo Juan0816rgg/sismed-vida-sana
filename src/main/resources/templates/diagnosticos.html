@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Diagnósticos - SISMED Vida Sana</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #f4f7fb;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f766e, #0d9488);
+            color: white;
+            padding: 20px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .top-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .top-section h2 {
+            color: #1f2937;
+            font-size: 26px;
+        }
+
+        .btn-primary {
+            background: #0f766e;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+        }
+
+        .search {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f0fdfa;
+            color: #134e4a;
+            padding: 14px;
+            text-align: left;
+            border-bottom: 2px solid #ccfbf1;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .btn-delete {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #6b7280;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,.5);
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-buttons {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-cancel {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            background: #0f766e;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+    <div>
+
+        <h1>SISMED Vida Sana</h1>
+
+        <span>Sistema de Gestión Médica</span>
+
+    </div>
+
+    <span>Gestión de Diagnósticos</span>
+
+</div>
+
+
+<div class="container">
+
+    <div class="top-section">
+
+        <h2>Diagnósticos</h2>
+
+        <button
+                class="btn-primary"
+                onclick="abrirModal()">
+
+            + Nuevo diagnóstico
+
+        </button>
+
+    </div>
+
+
+    <div class="card">
+
+        <input
+                class="search"
+                id="buscar"
+                placeholder="Buscar diagnóstico o tratamiento..."
+                onkeyup="filtrarDiagnosticos()">
+
+
+        <table>
+
+            <thead>
+
+            <tr>
+
+                <th>Paciente</th>
+                <th>Médico</th>
+                <th>Diagnóstico</th>
+                <th>Tratamiento</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+
+            </tr>
+
+            </thead>
+
+            <tbody id="tablaDiagnosticos">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<div id="modalDiagnostico" class="modal">
+
+    <div class="modal-content">
+
+        <h2>Registrar diagnóstico</h2>
+
+        <form id="formDiagnostico">
+
+            <div class="form-group">
+
+                <label>Atención médica</label>
+
+                <select id="atencion" required>
+
+                    <option value="">
+                        Seleccione una atención
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Diagnóstico</label>
+
+                <textarea
+                        id="descripcion"
+                        maxlength="500"
+                        placeholder="Ingrese el diagnóstico"
+                        required>
+                </textarea>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Tratamiento</label>
+
+                <textarea
+                        id="tratamiento"
+                        maxlength="500"
+                        placeholder="Ingrese el tratamiento indicado">
+                </textarea>
+
+            </div>
+
+
+            <div class="form-buttons">
+
+                <button
+                        type="button"
+                        class="btn-cancel"
+                        onclick="cerrarModal()">
+
+                    Cancelar
+
+                </button>
+
+                <button
+                        type="submit"
+                        class="btn-save">
+
+                    Guardar diagnóstico
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    let diagnosticos = [];
+    let atenciones = [];
+
+
+    async function cargarDatos() {
+
+        try {
+
+            const [respuestaDiagnosticos,
+                   respuestaAtenciones] =
+                await Promise.all([
+
+                    fetch('/api/diagnosticos'),
+
+                    fetch('/api/atenciones')
+
+                ]);
+
+
+            if (!respuestaDiagnosticos.ok ||
+                !respuestaAtenciones.ok) {
+
+                throw new Error(
+                    'No se pudieron cargar los datos'
+                );
+
+            }
+
+
+            diagnosticos =
+                await respuestaDiagnosticos.json();
+
+            atenciones =
+                await respuestaAtenciones.json();
+
+
+            cargarSelectAtenciones();
+
+            mostrarDiagnosticos(diagnosticos);
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                'Error al cargar la información'
+            );
+
+        }
+
+    }
+
+
+    function cargarSelectAtenciones() {
+
+        const select =
+            document.getElementById('atencion');
+
+        select.innerHTML = `
+            <option value="">
+                Seleccione una atención
+            </option>
+        `;
+
+
+        atenciones.forEach(atencion => {
+
+            const option =
+                document.createElement('option');
+
+            option.value = atencion.id;
+
+            option.textContent =
+                `${atencion.id} -
+                ${atencion.cita.paciente.nombres}
+                ${atencion.cita.paciente.apellidos} -
+                ${atencion.sintomas}`;
+
+            select.appendChild(option);
+
+        });
+
+    }
+
+
+    function mostrarDiagnosticos(lista) {
+
+        const tabla =
+            document.getElementById(
+                'tablaDiagnosticos'
+            );
+
+        tabla.innerHTML = '';
+
+
+        if (lista.length === 0) {
+
+            tabla.innerHTML = `
+
+                <tr>
+
+                    <td colspan="6" class="empty">
+
+                        No hay diagnósticos registrados.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        lista.forEach(diagnostico => {
+
+            const fila =
+                document.createElement('tr');
+
+
+            fila.innerHTML = `
+
+                <td>
+                    ${diagnostico.atencion.cita.paciente.nombres}
+                    ${diagnostico.atencion.cita.paciente.apellidos}
+                </td>
+
+                <td>
+                    Dr.
+                    ${diagnostico.atencion.cita.medico.nombres}
+                    ${diagnostico.atencion.cita.medico.apellidos}
+                </td>
+
+                <td>
+                    ${diagnostico.descripcion}
+                </td>
+
+                <td>
+                    ${diagnostico.tratamiento || '-'}
+                </td>
+
+                <td>
+                    ${new Date(
+                        diagnostico.fechaRegistro
+                    ).toLocaleString('es-PE')}
+                </td>
+
+                <td>
+
+                    <button
+                            class="btn-delete"
+                            onclick="eliminarDiagnostico(${diagnostico.id})">
+
+                        Eliminar
+
+                    </button>
+
+                </td>
+
+            `;
+
+            tabla.appendChild(fila);
+
+        });
+
+    }
+
+
+    function filtrarDiagnosticos() {
+
+        const texto =
+            document.getElementById('buscar')
+                .value
+                .toLowerCase();
+
+
+        const filtrados =
+            diagnosticos.filter(diagnostico =>
+
+                diagnostico.descripcion
+                    .toLowerCase()
+                    .includes(texto)
+
+                ||
+
+                (diagnostico.tratamiento || '')
+                    .toLowerCase()
+                    .includes(texto)
+
+            );
+
+
+        mostrarDiagnosticos(filtrados);
+
+    }
+
+
+    function abrirModal() {
+
+        cargarDatos();
+
+        document.getElementById(
+            'modalDiagnostico'
+        ).style.display = 'block';
+
+    }
+
+
+    function cerrarModal() {
+
+        document.getElementById(
+            'modalDiagnostico'
+        ).style.display = 'none';
+
+        document.getElementById(
+            'formDiagnostico'
+        ).reset();
+
+    }
+
+
+    document
+        .getElementById('formDiagnostico')
+        .addEventListener(
+            'submit',
+            async function(event) {
+
+                event.preventDefault();
+
+
+                const diagnostico = {
+
+                    atencion: {
+
+                        id: Number(
+                            document.getElementById(
+                                'atencion'
+                            ).value
+                        )
+
+                    },
+
+                    descripcion:
+                        document.getElementById(
+                            'descripcion'
+                        ).value,
+
+                    tratamiento:
+                        document.getElementById(
+                            'tratamiento'
+                        ).value
+
+                };
+
+
+                try {
+
+                    const respuesta =
+                        await fetch(
+                            '/api/diagnosticos',
+                            {
+
+                                method: 'POST',
+
+                                headers: {
+                                    'Content-Type':
+                                        'application/json'
+                                },
+
+                                body:
+                                    JSON.stringify(
+                                        diagnostico
+                                    )
+
+                            }
+                        );
+
+
+                    if (!respuesta.ok) {
+
+                        const mensaje =
+                            await respuesta.text();
+
+                        alert(
+                            'No se pudo registrar el diagnóstico.\n'
+                            + mensaje
+                        );
+
+                        return;
+
+                    }
+
+
+                    alert(
+                        'Diagnóstico registrado correctamente'
+                    );
+
+
+                    cerrarModal();
+
+                    cargarDatos();
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    alert(
+                        'Error al registrar el diagnóstico'
+                    );
+
+                }
+
+            }
+        );
+
+
+    async function eliminarDiagnostico(id) {
+
+        if (
+            !confirm(
+                '¿Está seguro de eliminar este diagnóstico?'
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        try {
+
+            const respuesta =
+                await fetch(
+                    `/api/diagnosticos/${id}`,
+                    {
+                        method: 'DELETE'
+                    }
+                );
+
+
+            if (!respuesta.ok) {
+
+                alert(
+                    'No se pudo eliminar el diagnóstico'
+                );
+
+                return;
+
+            }
+
+
+            alert(
+                'Diagnóstico eliminado correctamente'
+            );
+
+            cargarDatos();
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                'Error al eliminar el diagnóstico'
+            );
+
+        }
+
+    }
+
+
+    cargarDatos();
+
+</script>
+
+</body>
+
+</html>

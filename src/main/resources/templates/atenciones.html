@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gestión de Atenciones - SISMED Vida Sana</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #f4f7fb;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f766e, #0d9488);
+            color: white;
+            padding: 20px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header span {
+            font-size: 14px;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .top-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .top-section h2 {
+            color: #1f2937;
+            font-size: 26px;
+        }
+
+        .btn-primary {
+            background: #0f766e;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            background: #115e59;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+        }
+
+        .search {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f0fdfa;
+            color: #134e4a;
+            padding: 14px;
+            text-align: left;
+            border-bottom: 2px solid #ccfbf1;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        .badge {
+            background: #dcfce7;
+            color: #166534;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .btn-delete {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #6b7280;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,.5);
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 650px;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #1f2937;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+            color: #374151;
+        }
+
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-buttons {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-cancel {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            background: #0f766e;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+    <div>
+
+        <h1>SISMED Vida Sana</h1>
+
+        <span>Sistema de Gestión Médica</span>
+
+    </div>
+
+    <span>Gestión de Atenciones</span>
+
+</div>
+
+
+<div class="container">
+
+    <div class="top-section">
+
+        <h2>Atenciones médicas</h2>
+
+        <button
+                class="btn-primary"
+                onclick="abrirModal()">
+
+            + Nueva atención
+
+        </button>
+
+    </div>
+
+
+    <div class="card">
+
+        <input
+                class="search"
+                id="buscar"
+                type="text"
+                placeholder="Buscar por paciente, médico o síntomas..."
+                onkeyup="filtrarAtenciones()">
+
+
+        <table>
+
+            <thead>
+
+            <tr>
+
+                <th>Fecha</th>
+                <th>Paciente</th>
+                <th>Médico</th>
+                <th>Síntomas</th>
+                <th>Observaciones</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+
+            </tr>
+
+            </thead>
+
+            <tbody id="tablaAtenciones">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<!-- MODAL -->
+
+<div id="modalAtencion" class="modal">
+
+    <div class="modal-content">
+
+        <h2>Registrar atención médica</h2>
+
+        <form id="formAtencion">
+
+            <div class="form-group">
+
+                <label>Cita</label>
+
+                <select id="cita" required>
+
+                    <option value="">
+                        Seleccione una cita
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Síntomas</label>
+
+                <textarea
+                        id="sintomas"
+                        maxlength="500"
+                        placeholder="Describa los síntomas del paciente"
+                        required>
+                </textarea>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Observaciones médicas</label>
+
+                <textarea
+                        id="observaciones"
+                        maxlength="1000"
+                        placeholder="Ingrese las observaciones médicas">
+                </textarea>
+
+            </div>
+
+
+            <div class="form-buttons">
+
+                <button
+                        type="button"
+                        class="btn-cancel"
+                        onclick="cerrarModal()">
+
+                    Cancelar
+
+                </button>
+
+                <button
+                        type="submit"
+                        class="btn-save">
+
+                    Guardar atención
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    let atenciones = [];
+    let citas = [];
+
+
+    async function cargarDatos() {
+
+        try {
+
+            const [respuestaAtenciones,
+                   respuestaCitas] =
+                await Promise.all([
+
+                    fetch('/api/atenciones'),
+
+                    fetch('/api/citas')
+
+                ]);
+
+
+            if (!respuestaAtenciones.ok ||
+                !respuestaCitas.ok) {
+
+                throw new Error(
+                    'No se pudieron cargar los datos'
+                );
+
+            }
+
+
+            atenciones =
+                await respuestaAtenciones.json();
+
+            citas =
+                await respuestaCitas.json();
+
+
+            cargarSelectCitas();
+
+            mostrarAtenciones(atenciones);
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                'Error al cargar la información'
+            );
+
+        }
+
+    }
+
+
+    function cargarSelectCitas() {
+
+        const select =
+            document.getElementById('cita');
+
+        select.innerHTML = `
+            <option value="">
+                Seleccione una cita
+            </option>
+        `;
+
+
+        citas.forEach(cita => {
+
+            const option =
+                document.createElement('option');
+
+            option.value = cita.id;
+
+            option.textContent =
+                `${cita.id} - ${cita.paciente.nombres}
+                ${cita.paciente.apellidos} -
+                Dr. ${cita.medico.nombres}
+                ${cita.medico.apellidos} -
+                ${cita.fechaHora}`;
+
+            select.appendChild(option);
+
+        });
+
+    }
+
+
+    function mostrarAtenciones(lista) {
+
+        const tabla =
+            document.getElementById(
+                'tablaAtenciones'
+            );
+
+        tabla.innerHTML = '';
+
+
+        if (lista.length === 0) {
+
+            tabla.innerHTML = `
+
+                <tr>
+
+                    <td colspan="7" class="empty">
+
+                        No hay atenciones registradas.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        lista.forEach(atencion => {
+
+            const fila =
+                document.createElement('tr');
+
+
+            fila.innerHTML = `
+
+                <td>
+                    ${new Date(
+                        atencion.fechaAtencion
+                    ).toLocaleString('es-PE')}
+                </td>
+
+                <td>
+                    ${atencion.cita.paciente.nombres}
+                    ${atencion.cita.paciente.apellidos}
+                </td>
+
+                <td>
+                    Dr. ${atencion.cita.medico.nombres}
+                    ${atencion.cita.medico.apellidos}
+                </td>
+
+                <td>
+                    ${atencion.sintomas}
+                </td>
+
+                <td>
+                    ${atencion.observaciones || '-'}
+                </td>
+
+                <td>
+
+                    <span class="badge">
+                        ${atencion.estado}
+                    </span>
+
+                </td>
+
+                <td>
+
+                    <button
+                            class="btn-delete"
+                            onclick="eliminarAtencion(${atencion.id})">
+
+                        Eliminar
+
+                    </button>
+
+                </td>
+
+            `;
+
+            tabla.appendChild(fila);
+
+        });
+
+    }
+
+
+    function filtrarAtenciones() {
+
+        const texto =
+            document.getElementById('buscar')
+                .value
+                .toLowerCase();
+
+
+        const filtradas =
+            atenciones.filter(atencion => {
+
+                const paciente =
+                    `${atencion.cita.paciente.nombres}
+                     ${atencion.cita.paciente.apellidos}`
+                        .toLowerCase();
+
+                const medico =
+                    `${atencion.cita.medico.nombres}
+                     ${atencion.cita.medico.apellidos}`
+                        .toLowerCase();
+
+                const sintomas =
+                    atencion.sintomas
+                        .toLowerCase();
+
+
+                return paciente.includes(texto)
+                    || medico.includes(texto)
+                    || sintomas.includes(texto);
+
+            });
+
+
+        mostrarAtenciones(filtradas);
+
+    }
+
+
+    function abrirModal() {
+
+        cargarDatos();
+
+        document.getElementById(
+            'modalAtencion'
+        ).style.display = 'block';
+
+    }
+
+
+    function cerrarModal() {
+
+        document.getElementById(
+            'modalAtencion'
+        ).style.display = 'none';
+
+        document.getElementById(
+            'formAtencion'
+        ).reset();
+
+    }
+
+
+    document
+        .getElementById('formAtencion')
+        .addEventListener(
+            'submit',
+            async function(event) {
+
+                event.preventDefault();
+
+
+                const atencion = {
+
+                    cita: {
+
+                        id: Number(
+                            document.getElementById(
+                                'cita'
+                            ).value
+                        )
+
+                    },
+
+                    sintomas:
+                        document.getElementById(
+                            'sintomas'
+                        ).value,
+
+                    observaciones:
+                        document.getElementById(
+                            'observaciones'
+                        ).value
+
+                };
+
+
+                try {
+
+                    const respuesta =
+                        await fetch(
+                            '/api/atenciones',
+                            {
+
+                                method: 'POST',
+
+                                headers: {
+                                    'Content-Type':
+                                        'application/json'
+                                },
+
+                                body:
+                                    JSON.stringify(atencion)
+
+                            }
+                        );
+
+
+                    if (!respuesta.ok) {
+
+                        const mensaje =
+                            await respuesta.text();
+
+                        alert(
+                            'No se pudo registrar la atención.\n'
+                            + mensaje
+                        );
+
+                        return;
+
+                    }
+
+
+                    alert(
+                        'Atención registrada correctamente'
+                    );
+
+
+                    cerrarModal();
+
+                    cargarDatos();
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    alert(
+                        'Error al registrar la atención'
+                    );
+
+                }
+
+            }
+        );
+
+
+    async function eliminarAtencion(id) {
+
+        if (
+            !confirm(
+                '¿Está seguro de eliminar esta atención?'
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        try {
+
+            const respuesta =
+                await fetch(
+                    `/api/atenciones/${id}`,
+                    {
+                        method: 'DELETE'
+                    }
+                );
+
+
+            if (!respuesta.ok) {
+
+                alert(
+                    'No se pudo eliminar la atención'
+                );
+
+                return;
+
+            }
+
+
+            alert(
+                'Atención eliminada correctamente'
+            );
+
+            cargarDatos();
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                'Error al eliminar la atención'
+            );
+
+        }
+
+    }
+
+
+    cargarDatos();
+
+</script>
+
+</body>
+
+</html>

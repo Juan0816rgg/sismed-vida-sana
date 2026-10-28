@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Reportes - SISMED Vida Sana
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #f4f7fb;
+        }
+
+        .header {
+            background: linear-gradient(
+                135deg,
+                #0f766e,
+                #0d9488
+            );
+
+            color: white;
+
+            padding: 22px 35px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        h2 {
+            color: #1f2937;
+            margin-bottom: 25px;
+        }
+
+        .report-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(220px, 1fr));
+
+            gap: 20px;
+        }
+
+        .report {
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 12px;
+
+            box-shadow:
+                0 4px 12px rgba(0,0,0,.08);
+        }
+
+        .report h3 {
+            color: #6b7280;
+
+            font-size: 14px;
+
+            margin-bottom: 12px;
+        }
+
+        .value {
+            font-size: 30px;
+
+            font-weight: bold;
+
+            color: #0f766e;
+        }
+
+        .back {
+            display: inline-block;
+
+            margin-top: 25px;
+
+            background: #0f766e;
+
+            color: white;
+
+            text-decoration: none;
+
+            padding: 11px 18px;
+
+            border-radius: 7px;
+
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<header class="header">
+
+    <h1>
+        SISMED Vida Sana
+    </h1>
+
+    <span>
+        Reportes
+    </span>
+
+</header>
+
+
+<div class="container">
+
+    <h2>
+        Reporte general del sistema
+    </h2>
+
+
+    <div class="report-grid">
+
+
+        <div class="report">
+
+            <h3>
+                PACIENTES REGISTRADOS
+            </h3>
+
+            <div
+                    class="value"
+                    th:text="${pacientes}">
+
+                0
+
+            </div>
+
+        </div>
+
+
+        <div class="report">
+
+            <h3>
+                MÉDICOS REGISTRADOS
+            </h3>
+
+            <div
+                    class="value"
+                    th:text="${medicos}">
+
+                0
+
+            </div>
+
+        </div>
+
+
+        <div class="report">
+
+            <h3>
+                CITAS REGISTRADAS
+            </h3>
+
+            <div
+                    class="value"
+                    th:text="${citas}">
+
+                0
+
+            </div>
+
+        </div>
+
+
+        <div class="report">
+
+            <h3>
+                ATENCIONES REALIZADAS
+            </h3>
+
+            <div
+                    class="value"
+                    th:text="${atenciones}">
+
+                0
+
+            </div>
+
+        </div>
+
+
+        <div class="report">
+
+            <h3>
+                INGRESOS REGISTRADOS
+            </h3>
+
+            <div
+                    class="value"
+                    th:text="'S/ ' + ${ingresos}">
+
+                S/ 0.00
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <a
+            href="/dashboard"
+            class="back">
+
+        ← Volver al Dashboard
+
+    </a>
+
+</div>
+
+</body>
+
+</html>

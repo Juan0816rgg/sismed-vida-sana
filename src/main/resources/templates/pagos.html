@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gestión de Pagos - SISMED Vida Sana</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #f4f7fb;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f766e, #0d9488);
+            color: white;
+            padding: 20px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .top-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .top-section h2 {
+            color: #1f2937;
+            font-size: 26px;
+        }
+
+        .btn-primary {
+            background: #0f766e;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+        }
+
+        .search {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f0fdfa;
+            color: #134e4a;
+            padding: 14px;
+            text-align: left;
+            border-bottom: 2px solid #ccfbf1;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .badge {
+            background: #dcfce7;
+            color: #166534;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .btn-delete {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #6b7280;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,.5);
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+        }
+
+        .form-buttons {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-cancel {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            background: #0f766e;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+    <div>
+        <h1>SISMED Vida Sana</h1>
+        <span>Sistema de Gestión Médica</span>
+    </div>
+
+    <span>Gestión de Pagos</span>
+
+</div>
+
+
+<div class="container">
+
+    <div class="top-section">
+
+        <h2>Pagos</h2>
+
+        <button
+                class="btn-primary"
+                onclick="abrirModal()">
+
+            + Nuevo pago
+
+        </button>
+
+    </div>
+
+
+    <div class="card">
+
+        <input
+                class="search"
+                id="buscar"
+                placeholder="Buscar por paciente, concepto o método de pago..."
+                onkeyup="filtrarPagos()">
+
+
+        <table>
+
+            <thead>
+
+            <tr>
+
+                <th>Fecha</th>
+                <th>Paciente</th>
+                <th>Concepto</th>
+                <th>Monto</th>
+                <th>Método</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+
+            </tr>
+
+            </thead>
+
+            <tbody id="tablaPagos">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<div id="modalPago" class="modal">
+
+    <div class="modal-content">
+
+        <h2>Registrar pago</h2>
+
+        <form id="formPago">
+
+            <div class="form-group">
+
+                <label>Paciente</label>
+
+                <select id="paciente" required>
+
+                    <option value="">
+                        Seleccione un paciente
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Cita relacionada</label>
+
+                <select id="cita">
+
+                    <option value="">
+                        Sin cita relacionada
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Concepto</label>
+
+                <input
+                        type="text"
+                        id="concepto"
+                        maxlength="200"
+                        placeholder="Ej. Consulta médica">
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Monto (S/)</label>
+
+                <input
+                        type="number"
+                        id="monto"
+                        min="0.01"
+                        step="0.01"
+                        required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Método de pago</label>
+
+                <select id="metodoPago" required>
+
+                    <option value="EFECTIVO">
+                        Efectivo
+                    </option>
+
+                    <option value="TARJETA">
+                        Tarjeta
+                    </option>
+
+                    <option value="YAPE">
+                        Yape
+                    </option>
+
+                    <option value="PLIN">
+                        Plin
+                    </option>
+
+                    <option value="TRANSFERENCIA">
+                        Transferencia
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-buttons">
+
+                <button
+                        type="button"
+                        class="btn-cancel"
+                        onclick="cerrarModal()">
+
+                    Cancelar
+
+                </button>
+
+                <button
+                        type="submit"
+                        class="btn-save">
+
+                    Registrar pago
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    let pagos = [];
+    let pacientes = [];
+    let citas = [];
+
+
+    async function cargarDatos() {
+
+        try {
+
+            const [respuestaPagos,
+                   respuestaPacientes,
+                   respuestaCitas] =
+                await Promise.all([
+
+                    fetch('/api/pagos'),
+                    fetch('/api/pacientes'),
+                    fetch('/api/citas')
+
+                ]);
+
+
+            if (!respuestaPagos.ok ||
+                !respuestaPacientes.ok ||
+                !respuestaCitas.ok) {
+
+                throw new Error(
+                    'No se pudieron cargar los datos'
+                );
+
+            }
+
+
+            pagos = await respuestaPagos.json();
+
+            pacientes =
+                await respuestaPacientes.json();
+
+            citas =
+                await respuestaCitas.json();
+
+
+            cargarSelectPacientes();
+
+            cargarSelectCitas();
+
+            mostrarPagos(pagos);
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                'Error al cargar la información'
+            );
+
+        }
+
+    }
+
+
+    function cargarSelectPacientes() {
+
+        const select =
+            document.getElementById('paciente');
+
+        select.innerHTML = `
+            <option value="">
+                Seleccione un paciente
+            </option>
+        `;
+
+
+        pacientes
+            .filter(p => p.activo)
+            .forEach(paciente => {
+
+                const option =
+                    document.createElement('option');
+
+                option.value = paciente.id;
+
+                option.textContent =
+                    `${paciente.dni} - ${paciente.nombres} ${paciente.apellidos}`;
+
+                select.appendChild(option);
+
+            });
+
+    }
+
+
+    function cargarSelectCitas() {
+
+        const select =
+            document.getElementById('cita');
+
+        select.innerHTML = `
+            <option value="">
+                Sin cita relacionada
+            </option>
+        `;
+
+
+        citas.forEach(cita => {
+
+            const option =
+                document.createElement('option');
+
+            option.value = cita.id;
+
+            option.textContent =
+                `Cita #${cita.id} - ${cita.paciente.nombres}
+                ${cita.paciente.apellidos} -
+                ${cita.fechaHora}`;
+
+            select.appendChild(option);
+
+        });
+
+    }
+
+
+    function mostrarPagos(lista) {
+
+        const tabla =
+            document.getElementById('tablaPagos');
+
+        tabla.innerHTML = '';
+
+
+        if (lista.length === 0) {
+
+            tabla.innerHTML = `
+
+                <tr>
+
+                    <td colspan="7" class="empty">
+
+                        No hay pagos registrados.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        lista.forEach(pago => {
+
+            const fila =
+                document.createElement('tr');
+
+
+            fila.innerHTML = `
+
+                <td>
+                    ${new Date(
+                        pago.fechaPago
+                    ).toLocaleString('es-PE')}
+                </td>
+
+                <td>
+                    ${pago.paciente.nombres}
+                    ${pago.paciente.apellidos}
+                </td>
+
+                <td>
+                    ${pago.concepto || '-'}
+                </td>
+
+                <td>
+                    S/ ${Number(
+                        pago.monto
+                    ).toFixed(2)}
+                </td>
+
+                <td>
+                    ${pago.metodoPago}
+                </td>
+
+                <td>
+
+                    <span class="badge">
+                        ${pago.estado}
+                    </span>
+
+                </td>
+
+                <td>
+
+                    <button
+                            class="btn-delete"
+                            onclick="eliminarPago(${pago.id})">
+
+                        Eliminar
+
+                    </button>
+
+                </td>
+
+            `;
+
+            tabla.appendChild(fila);
+
+        });
+
+    }
+
+
+    function filtrarPagos() {
+
+        const texto =
+            document.getElementById('buscar')
+                .value
+                .toLowerCase();
+
+
+        const filtrados =
+            pagos.filter(pago => {
+
+                const paciente =
+                    `${pago.paciente.nombres}
+                     ${pago.paciente.apellidos}`
+                        .toLowerCase();
+
+                const concepto =
+                    (pago.concepto || '')
+                        .toLowerCase();
+
+                const metodo =
+                    pago.metodoPago
+                        .toLowerCase();
+
+
+                return paciente.includes(texto)
+                    || concepto.includes(texto)
+                    || metodo.includes(texto);
+
+            });
+
+
+        mostrarPagos(filtrados);
+
+    }
+
+
+    function abrirModal() {
+
+        cargarDatos();
+
+        document.getElementById(
+            'modalPago'
+        ).style.display = 'block';
+
+    }
+
+
+    function cerrarModal() {
+
+        document.getElementById(
+            'modalPago'
+        ).style.display = 'none';
+
+        document.getElementById(
+            'formPago'
+        ).reset();
+
+    }
+
+
+    document
+        .getElementById('formPago')
+        .addEventListener(
+            'submit',
+            async function(event) {
+
+                event.preventDefault();
+
+
+                const pacienteId =
+                    Number(
+                        document.getElementById(
+                            'paciente'
+                        ).value
+                    );
+
+
+                const citaId =
+                    document.getElementById(
+                        'cita'
+                    ).value;
+
+
+                const pago = {
+
+                    paciente: {
+                        id: pacienteId
+                    },
+
+                    cita: citaId
+                        ? {
+                            id: Number(citaId)
+                        }
+                        : null,
+
+                    concepto:
+                        document.getElementById(
+                            'concepto'
+                        ).value,
+
+                    monto:
+                        Number(
+                            document.getElementById(
+                                'monto'
+                            ).value
+                        ),
+
+                    metodoPago:
+                        document.getElementById(
+                            'metodoPago'
+                        ).value,
+
+                    estado: 'PAGADO'
+
+                };
+
+
+                try {
+
+                    const respuesta =
+                        await fetch(
+                            '/api/pagos',
+                            {
+
+                                method: 'POST',
+
+                                headers: {
+                                    'Content-Type':
+                                        'application/json'
+                                },
+
+                                body:
+                                    JSON.stringify(pago)
+
+                            }
+                        );
+
+
+                    if (!respuesta.ok) {
+
+                        const mensaje =
+                            await respuesta.text();
+
+                        alert(
+                            'No se pudo registrar el pago.\n'
+                            + mensaje
+                        );
+
+                        return;
+
+                    }
+
+
+                    alert(
+                        'Pago registrado correctamente'
+                    );
+
+
+                    cerrarModal();
+
+                    cargarDatos();
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    alert(
+                        'Error al registrar el pago'
+                    );
+
+                }
+
+            }
+        );
+
+
+    async function eliminarPago(id) {
+
+        if (
+            !confirm(
+                '¿Está seguro de eliminar este pago?'
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        try {
+
+            const respuesta =
+                await fetch(
+                    `/api/pagos/${id}`,
+                    {
+                        method: 'DELETE'
+                    }
+                );
+
+
+            if (!respuesta.ok) {
+
+                alert(
+                    'No se pudo eliminar el pago'
+                );
+
+                return;
+
+            }
+
+
+            alert(
+                'Pago eliminado correctamente'
+            );
+
+            cargarDatos();
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                'Error al eliminar el pago'
+            );
+
+        }
+
+    }
+
+
+    cargarDatos();
+
+</script>
+
+</body>
+
+</html>

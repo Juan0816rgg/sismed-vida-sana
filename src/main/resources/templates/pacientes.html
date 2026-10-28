@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gestión de Pacientes - SISMED Vida Sana</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background-color: #f4f7fb;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f766e, #0d9488);
+            color: white;
+            padding: 20px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header span {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .top-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .top-section h2 {
+            color: #1f2937;
+            font-size: 26px;
+        }
+
+        .btn-primary {
+            background-color: #0f766e;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            background-color: #115e59;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #f0fdfa;
+            color: #134e4a;
+            padding: 14px;
+            text-align: left;
+            border-bottom: 2px solid #ccfbf1;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+        }
+
+        tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .badge {
+            background-color: #dcfce7;
+            color: #166534;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .btn-edit {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-delete {
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #6b7280;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 650px;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #1f2937;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+        }
+
+        .form-buttons {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-cancel {
+            background-color: #6b7280;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            background-color: #0f766e;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <div>
+        <h1>SISMED Vida Sana</h1>
+        <span>Sistema de Gestión Médica</span>
+    </div>
+
+    <span>Gestión de Pacientes</span>
+</div>
+
+<div class="container">
+
+    <div class="top-section">
+        <h2>Pacientes</h2>
+
+        <button class="btn-primary" onclick="abrirModal()">
+            + Nuevo paciente
+        </button>
+    </div>
+
+    <div class="card">
+
+        <div class="search-box">
+            <input
+                    type="text"
+                    id="buscar"
+                    placeholder="Buscar paciente por DNI, nombres o apellidos..."
+                    onkeyup="filtrarPacientes()">
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>DNI</th>
+                <th>Nombres</th>
+                <th>Apellidos</th>
+                <th>Teléfono</th>
+                <th>Correo</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+
+            <tbody id="tablaPacientes">
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
+<!-- MODAL -->
+
+<div id="modalPaciente" class="modal">
+
+    <div class="modal-content">
+
+        <h2>Registrar paciente</h2>
+
+        <form id="formPaciente">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>DNI</label>
+                    <input type="text" id="dni" maxlength="8" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Nombres</label>
+                    <input type="text" id="nombres" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Apellidos</label>
+                    <input type="text" id="apellidos" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Fecha de nacimiento</label>
+                    <input type="date" id="fechaNacimiento">
+                </div>
+
+                <div class="form-group">
+                    <label>Sexo</label>
+                    <select id="sexo">
+                        <option value="">Seleccione</option>
+                        <option value="MASCULINO">Masculino</option>
+                        <option value="FEMENINO">Femenino</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="text" id="telefono" maxlength="9">
+                </div>
+
+                <div class="form-group">
+                    <label>Correo</label>
+                    <input type="email" id="correo">
+                </div>
+
+                <div class="form-group">
+                    <label>Dirección</label>
+                    <input type="text" id="direccion">
+                </div>
+
+            </div>
+
+            <div class="form-buttons">
+
+                <button
+                        type="button"
+                        class="btn-cancel"
+                        onclick="cerrarModal()">
+                    Cancelar
+                </button>
+
+                <button
+                        type="submit"
+                        class="btn-save">
+                    Guardar paciente
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+    let pacientes = [];
+
+    async function cargarPacientes() {
+
+        try {
+
+            const respuesta = await fetch('/api/pacientes');
+
+            if (!respuesta.ok) {
+                throw new Error('No se pudieron cargar los pacientes');
+            }
+
+            pacientes = await respuesta.json();
+
+            mostrarPacientes(pacientes);
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert('Error al cargar los pacientes');
+
+        }
+    }
+
+    function mostrarPacientes(lista) {
+
+        const tabla = document.getElementById('tablaPacientes');
+
+        tabla.innerHTML = '';
+
+        if (lista.length === 0) {
+
+            tabla.innerHTML = `
+                <tr>
+                    <td colspan="7" class="empty">
+                        No hay pacientes registrados.
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+        lista.forEach(paciente => {
+
+            const fila = document.createElement('tr');
+
+            fila.innerHTML = `
+
+                <td>${paciente.dni}</td>
+
+                <td>${paciente.nombres}</td>
+
+                <td>${paciente.apellidos}</td>
+
+                <td>${paciente.telefono || '-'}</td>
+
+                <td>${paciente.correo || '-'}</td>
+
+                <td>
+                    <span class="badge">
+                        ${paciente.activo ? 'Activo' : 'Inactivo'}
+                    </span>
+                </td>
+
+                <td>
+
+                    <button
+                        class="btn-edit"
+                        onclick="editarPaciente(${paciente.id})">
+                        Editar
+                    </button>
+
+                    <button
+                        class="btn-delete"
+                        onclick="eliminarPaciente(${paciente.id})">
+                        Eliminar
+                    </button>
+
+                </td>
+            `;
+
+            tabla.appendChild(fila);
+
+        });
+    }
+
+    function filtrarPacientes() {
+
+        const texto =
+            document.getElementById('buscar').value.toLowerCase();
+
+        const filtrados = pacientes.filter(paciente =>
+
+            paciente.dni.toLowerCase().includes(texto) ||
+
+            paciente.nombres.toLowerCase().includes(texto) ||
+
+            paciente.apellidos.toLowerCase().includes(texto)
+        );
+
+        mostrarPacientes(filtrados);
+    }
+
+    function abrirModal() {
+
+        document.getElementById('modalPaciente').style.display = 'block';
+
+    }
+
+    function cerrarModal() {
+
+        document.getElementById('modalPaciente').style.display = 'none';
+
+        document.getElementById('formPaciente').reset();
+
+    }
+
+    document
+        .getElementById('formPaciente')
+        .addEventListener('submit', async function(event) {
+
+            event.preventDefault();
+
+            const paciente = {
+
+                dni: document.getElementById('dni').value,
+
+                nombres: document.getElementById('nombres').value,
+
+                apellidos: document.getElementById('apellidos').value,
+
+                fechaNacimiento:
+                    document.getElementById('fechaNacimiento').value || null,
+
+                sexo: document.getElementById('sexo').value || null,
+
+                telefono:
+                    document.getElementById('telefono').value || null,
+
+                correo:
+                    document.getElementById('correo').value || null,
+
+                direccion:
+                    document.getElementById('direccion').value || null
+
+            };
+
+            try {
+
+                const respuesta = await fetch('/api/pacientes', {
+
+                    method: 'POST',
+
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+
+                    body: JSON.stringify(paciente)
+
+                });
+
+                if (!respuesta.ok) {
+
+                    alert(
+                        'No se pudo registrar el paciente. ' +
+                        'Verifique los datos o el DNI.'
+                    );
+
+                    return;
+                }
+
+                alert('Paciente registrado correctamente');
+
+                cerrarModal();
+
+                cargarPacientes();
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert('Error al registrar el paciente');
+
+            }
+
+        });
+
+    async function eliminarPaciente(id) {
+
+        if (!confirm('¿Está seguro de eliminar este paciente?')) {
+            return;
+        }
+
+        try {
+
+            const respuesta = await fetch(
+                `/api/pacientes/${id}`,
+                {
+                    method: 'DELETE'
+                }
+            );
+
+            if (!respuesta.ok) {
+
+                alert('No se pudo eliminar el paciente');
+
+                return;
+            }
+
+            alert('Paciente eliminado correctamente');
+
+            cargarPacientes();
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert('Error al eliminar el paciente');
+
+        }
+    }
+
+    function editarPaciente(id) {
+
+        alert(
+            'La edición de pacientes se implementará en la siguiente mejora del módulo.'
+        );
+
+    }
+
+    cargarPacientes();
+
+</script>
+
+</body>
+</html>
